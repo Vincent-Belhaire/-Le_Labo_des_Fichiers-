@@ -4,164 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Labo des Fichiers · Mission TICE</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <style>
+        /* --- Charte Graphique du Bureau Mystère --- */
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --font-base: 1rem;
+            --spacing-base: 1.25rem;
+        }
 
-    <header class="system-bar no-print">
-        <div class="bar-left">
-            <span class="logo-icon">📁</span>
-            <span class="mission-title">Mission : Données Numériques</span>
-        </div>
-        <div class="accessibility-controls">
-            <label for="zoom-range">🔍 Zoom :</label>
-            <input type="range" id="zoom-range" min="1" max="3" step="1" value="1">
-            <span id="zoom-label">Normal</span>
-        </div>
-        <div class="score-display-group" style="display: flex; gap: 10px; align-items: center;">
-            <div class="score-display">Score : <span id="current-score">4000</span> pts</div>
-            <button class="btn-reset-header" onclick="resetGameDirect()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #64748b; color: white; border-radius: 4px;">↻ Réinitialiser</button>
-        </div>
-    </header>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    <main class="container">
-        <!-- ACCUEIL -->
-        <section id="screen-intro" class="card active-screen no-print">
-            <h1>Validation des Compétences : Dossiers &amp; Fichiers</h1>
-            <p>Bienvenue dans l'application de validation du cours de Technologie. À l'aide de tes fiches de cours S21, S22 et S23, tu vas résoudre les énigmes techniques pour valider tes badges.</p>
-            <div class="pixel-box">
-                <span class="pixel-avatar">🤖</span>
-                <p><strong>Pixel :</strong> Ta progression est enregistrée automatiquement. En cas de bug ou de coupure, ton score reste mémorisé. Tu peux utiliser le bouton "Réinitialiser" pour recommencer à tout moment !</p>
-            </div>
-            <button class="btn-primary" onclick="nextScreen('screen-defi1')">Lancer les exercices →</button>
-        </section>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: var(--font-base);
+            line-height: 1.5;
+            padding-bottom: 3rem;
+        }
 
-        <!-- DÉFI 1 : ARBORESCENCE (Page 1) -->
-        <section id="screen-defi1" class="card no-print">
-            <div class="defi-header">
-                <span class="badge">S21 · Exercice 1</span>
-                <h2>Comment sont rangés les fichiers ?</h2>
-            </div>
-            <p class="consigne">En te basant sur le premier schéma de ton chapitre 1, associe chaque fichier au bon dossier de l'arborescence informatique.</p>
-            
-            <div class="matching-container">
-                <div class="match-row">
-                    <span>🎵 La Marseillaise</span>
-                    <select id="d1-r1" class="match-select">
-                        <option value="">-- Choisir dossier --</option>
-                        <option value="Cours">Dossier : Cours</option>
-                        <option value="Images">Dossier : Images</option>
-                        <option value="Musique">Dossier : Musique</option>
-                    </select>
-                </div>
-                <div class="match-row">
-                    <span>📝 Devoir techno</span>
-                    <select id="d1-r2" class="match-select">
-                        <option value="">-- Choisir dossier --</option>
-                        <option value="Cours">Dossier : Cours</option>
-                        <option value="Images">Dossier : Images</option>
-                        <option value="Musique">Dossier : Musique</option>
-                    </select>
-                </div>
-                <div class="match-row">
-                    <span>🖼️ Logo</span>
-                    <select id="d1-r3" class="match-select">
-                        <option value="">-- Choisir dossier --</option>
-                        <option value="Cours">Dossier : Cours</option>
-                        <option value="Images">Dossier : Images</option>
-                        <option value="Musique">Dossier : Musique</option>
-                    </select>
-                </div>
-            </div>
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-            <div class="feedback" id="feedback-defi1"></div>
-            <div class="defi-footer">
-                <button class="btn-help" onclick="showHelp(1)">💡 Coup de pouce</button>
-                <button class="btn-primary" id="defi1-validate-btn" onclick="checkDefi1()">Vérifier l'arborescence</button>
-                <button class="btn-primary hidden" id="next-to-defi2" onclick="nextScreen('screen-defi2')">Exercice suivant →</button>
-            </div>
-        </section>
+        /* --- Barre de système noire style OS --- */
+        .system-bar {
+            background-color: #1e293b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-        <!-- DÉFI 2 : BD RECONNAÎTRE UN FICHIER (Page 1 BD) -->
-        <section id="screen-defi2" class="card no-print">
-            <div class="defi-header">
-                <span class="badge">S22 · Exercice 2</span>
-                <h2>Enquête : La Bande Dessinée</h2>
-            </div>
-            <p class="consigne">Analyse la situation déclenchante de la page de ton cours (Léa et le professeur de Technologie) pour cocher les bonnes cases.</p>
+        .bar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+        }
 
-            <div class="quiz-block">
-                <p><strong>Question 1 :</strong> Qu'est-ce qui a disparu dans le deuxième affichage lorsque le professeur modifie les fichiers ?</p>
-                <label class="radio-label"><input type="radio" name="bd-q1" value="nom"> Le nom principal du fichier</label><br>
-                <label class="radio-label"><input type="radio" name="bd-q1" value="lettres"> Les lettres placées après le point (l'extension)</label><br>
-                <label class="radio-label"><input type="radio" name="bd-q1" value="icone"> L'icône du fichier</label>
-                
-                <p style="margin-top:1.5rem;"><strong>Question 2 :</strong> Quelles informations donnent des indices sur le contenu d'un fichier sans avoir besoin de l'ouvrir ? <em>(Plusieurs choix possibles)</em></p>
-                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="nom"> Son nom de fichier</label><br>
-                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="icone"> Son icône graphique</label><br>
-                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="lettres"> Les lettres placées après le point</label>
-            </div>
+        .accessibility-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+        }
 
-            <div class="feedback" id="feedback-defi2"></div>
-            <div class="defi-footer">
-                <button class="btn-help" onclick="showHelp(2)">💡 Coup de pouce</button>
-                <button class="btn-primary" id="defi2-validate-btn" onclick="checkDefi2()">Valider l'analyse BD</button>
-                <button class="btn-primary hidden" id="next-to-defi3" onclick="nextScreen('screen-defi3')">Exercice suivant →</button>
-            </div>
-        </section>
+        .accessibility-controls input[type="range"] {
+            cursor: pointer;
+            accent-color: #60a5fa;
+        }
 
-        <!-- DÉFI 3 : TABLEAU EXTENSIONS (Page 2) -->
-        <section id="screen-defi3" class="card no-print">
-            <div class="defi-header">
-                <span class="badge">S22 · Exercice 3</span>
-                <h2>Extensions et Logiciels associés</h2>
-            </div>
-            <p class="consigne">D'après ton tableau de recherche sur le réseau du collège, quel logiciel par défaut ouvre chaque extension ?</p>
+        .score-display {
+            font-weight: bold;
+            background-color: var(--primary-color);
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+        }
 
-            <div class="matching-container">
-                <div class="match-row">
-                    <span>🎬 Fichier <code>.webm</code> (Ex: KPop_Demon_Hunters)</span>
-                    <select id="ext-webm" class="match-select">
-                        <option value="">-- Logiciel --</option>
-                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
-                        <option value="VLC">Logiciel multimédia VLC</option>
-                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
-                    </select>
-                </div>
-                <div class="match-row">
-                    <span>🎵 Fichier <code>.mp3</code> (Ex: Fortnite.mp3)</span>
-                    <select id="ext-mp3" class="match-select">
-                        <option value="">-- Logiciel --</option>
-                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
-                        <option value="VLC">Logiciel multimédia VLC</option>
-                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
-                    </select>
-                </div>
-                <div class="match-row">
-                    <span>📄 Fichier <code>.pdf</code> (Ex: Consignes.pdf)</span>
-                    <select id="ext-pdf" class="match-select">
-                        <option value="">-- Logiciel --</option>
-                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
-                        <option value="VLC">Logiciel multimédia VLC</option>
-                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
-                    </select>
-                </div>
-            </div>
+        .btn-reset-header:hover {
+            background-color: #475569 !important;
+            transform: scale(1.03);
+        }
 
-            <div class="feedback" id="feedback-defi3"></div>
-            <div class="defi-footer">
-                <button class="btn-help" onclick="showHelp(3)">💡 Coup de pouce</button>
-                <button class="btn-primary" id="defi3-validate-btn" onclick="validateDefi3()">Vérifier le tableau</button>
-                <button class="btn-primary hidden" id="next-to-defi4" onclick="nextScreen('screen-defi4')">Exercice suivant →</button>
-            </div>
-        </section>
+        /* --- Cartes des écrans --- */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: calc(var(--spacing-base) * 1.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: none;
+        }
 
-        <!-- DÉFI 4 : TAILLES (Page 3) -->
-        <section id="screen-defi4" class="card no-print">
-            <div class="defi-header">
-                <span class="badge">S23 · Exercice 4</span>
-                <h2>Mesurer la taille des données numériques</h2>
-            </div>
-            <p class="consigne">Problème de fin de chapitre : Il te reste <strong>500 Mo</strong> libres sur ta clé USB. Peux-tu y stocker une vidéo de <strong>350 Mo</strong> ET une musique de <strong>8 Mo</strong> ?</p>
+        .card.active-screen {
+            display: block;
+        }
 
-            <div class="options-stack" id="defi4-options">
+        h1 {
+            font-size: calc(var(--font-base) * 1.8);
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: calc(var(--font-base) * 1.4);
+            color: #1e293b;
+        }
+
+        .consigne {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0 calc(var(--spacing-base) * 1.5) 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* --- Boîte Robot Pixel --- */
+        .pixel-box {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background-color: #eff6ff;
+            border: 1px dashed #bfdbfe;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .pixel-avatar { font-size: 2.5rem; }
+
+        /* --- Boutons et Formulaires --- */
+        button {
+            font-family: inherit;
+            font-size: var(--font-base);
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: #64748b; color: white; }
+        .btn-secondary:hover { background-color: #475569; }
+        .btn-help { background-color: #f59e0b; color: white; }
+        .btn-help:hover { background-color: #d97706; }
+        
+        .btn-option {
+            background-color: #f1f5f9;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            width: 100%;
+            text-align: left;
+            padding: 1rem;
+            font-weight: normal;
+        }
+        .btn-option:hover { background-color: #e2e8f0; border-color: #94a3b8; }
+
+        .options-grid, .options-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .defi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.75rem;
+        }
+
+        .badge {
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .defi-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 1.25rem;
+        }
+
+        /* --- Blocs QCM & Menus déroulants --- */
+        .quiz-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .quiz-block p { font-weight: bold; margin-bottom: 0.75rem; color: #0f172a; }
+        .radio-label, .checkbox-label { display: inline-block; margin-bottom: 0.6rem; cursor: pointer; }
+        .radio-label input, .checkbox-label input { margin-right: 0.6rem; transform: scale(1.15); }
+
+        .matching-container { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
+        .match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .match-select {
+            padding: 0.5rem;
+            font-size: var(--font-base);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            width: 230px;
+            background-color: #ffffff;
+        }
+
+        /* --- Feedbacks --- */
+        .feedback { padding: 1rem; border-radius: 6px; font-weight: bold; margin: 1rem 0; display: none; }
+        .feedback.correct { display: block; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .feedback.wrong { display: block; background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .hidden { display: none !important; }
+
+        /* --- Modale d'aide --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; }
+        .modal-content h3 { margin-bottom: 1rem; color: #d97706; }
+        .modal-content p { margin-bottom: 1.5rem; }
+
+        /* --- Bilan & Edition Impression --- */
+        .student-info-block { display: flex; gap: 1rem; margin: 1.5rem 0; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary-color); }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group input { padding: 0.6rem; font-size: var(--font-base); border: 1px solid var(--border-color); border-radius: 4px; }
+        .result-global-card { text-align: center; background: #f8fafc; border: 2px solid #e2e8f0; padding: 1.5rem; border-radius: 10px; }
+        .score-big { font-size: 2.5rem; font-weight: 900; color: var(--primary-color); margin: 0.5rem 0; }
+        .percentage-bar-container { background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; margin: 0.5rem auto 1rem auto; max-width: 300px; }
+        .percentage-bar { background: var(--success-color); height: 100%; width: 100%; transition: width 0.5s ease; }
+        .badge-error { background: var(--error-color); color: white; padding: 0.1rem 0.5rem; border-radius: 4px; font-weight: bold; }
+        
+        .table-bilan { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        .table-bilan th, .table-bilan td { border: 1px solid var(--border-color); padding: 0.75rem; text-align: left; }
+        .table-bilan th { background-color: #f1f5f9; }
+        .status-valid { color: var(--success-color); font-weight: bold; }
+        .status-error { color: var(--error-color); font-weight: bold; }
+
+        .hidden-print { display: none; }
+        .print-footer { display: none; text-align: center; margin-top: 3rem; font-size: 0.8rem; color: #64748b; }
+
+        /* --- LOGIQUE DES ZOOMS ACCESSIBILITÉ --- */
+        body.zoom-level-2 { --font-base: 1.25rem; --spacing-base: 1.75rem; }
+        body.zoom-level-2 .container { max-width: 950px; }
+        body.zoom-level-2 .match-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+        body.zoom-level-2 .match-select { width: 100%; }
+
+        body.zoom-level-3 { --font-base: 1.5rem; --spacing-base: 2.2rem; letter-spacing: 0.05em; word-spacing: 0.1em; }
+        body.zoom-level-3 .container { max-width: 100%; padding: 0 2rem; }
