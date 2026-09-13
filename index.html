@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Labo des Fichiers · Mission TICE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="system-bar no-print">
+        <div class="bar-left">
+            <span class="logo-icon">📁</span>
+            <span class="mission-title">Mission : Données Numériques</span>
+        </div>
+        <div class="accessibility-controls">
+            <label for="zoom-range">🔍 Zoom :</label>
+            <input type="range" id="zoom-range" min="1" max="3" step="1" value="1">
+            <span id="zoom-label">Normal</span>
+        </div>
+        <div class="score-display-group" style="display: flex; gap: 10px; align-items: center;">
+            <div class="score-display">Score : <span id="current-score">4000</span> pts</div>
+            <button class="btn-reset-header" onclick="resetGameDirect()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #64748b; color: white; border-radius: 4px;">↻ Réinitialiser</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ACCUEIL -->
+        <section id="screen-intro" class="card active-screen no-print">
+            <h1>Validation des Compétences : Dossiers &amp; Fichiers</h1>
+            <p>Bienvenue dans l'application de validation du cours de Technologie. À l'aide de tes fiches de cours S21, S22 et S23, tu vas résoudre les énigmes techniques pour valider tes badges.</p>
+            <div class="pixel-box">
+                <span class="pixel-avatar">🤖</span>
+                <p><strong>Pixel :</strong> Ta progression est enregistrée automatiquement. En cas de bug ou de coupure, ton score reste mémorisé. Tu peux utiliser le bouton "Réinitialiser" pour recommencer à tout moment !</p>
+            </div>
+            <button class="btn-primary" onclick="nextScreen('screen-defi1')">Lancer les exercices →</button>
+        </section>
+
+        <!-- DÉFI 1 : ARBORESCENCE (Page 1) -->
+        <section id="screen-defi1" class="card no-print">
+            <div class="defi-header">
+                <span class="badge">S21 · Exercice 1</span>
+                <h2>Comment sont rangés les fichiers ?</h2>
+            </div>
+            <p class="consigne">En te basant sur le premier schéma de ton chapitre 1, associe chaque fichier au bon dossier de l'arborescence informatique.</p>
+            
+            <div class="matching-container">
+                <div class="match-row">
+                    <span>🎵 La Marseillaise</span>
+                    <select id="d1-r1" class="match-select">
+                        <option value="">-- Choisir dossier --</option>
+                        <option value="Cours">Dossier : Cours</option>
+                        <option value="Images">Dossier : Images</option>
+                        <option value="Musique">Dossier : Musique</option>
+                    </select>
+                </div>
+                <div class="match-row">
+                    <span>📝 Devoir techno</span>
+                    <select id="d1-r2" class="match-select">
+                        <option value="">-- Choisir dossier --</option>
+                        <option value="Cours">Dossier : Cours</option>
+                        <option value="Images">Dossier : Images</option>
+                        <option value="Musique">Dossier : Musique</option>
+                    </select>
+                </div>
+                <div class="match-row">
+                    <span>🖼️ Logo</span>
+                    <select id="d1-r3" class="match-select">
+                        <option value="">-- Choisir dossier --</option>
+                        <option value="Cours">Dossier : Cours</option>
+                        <option value="Images">Dossier : Images</option>
+                        <option value="Musique">Dossier : Musique</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback-defi1"></div>
+            <div class="defi-footer">
+                <button class="btn-help" onclick="showHelp(1)">💡 Coup de pouce</button>
+                <button class="btn-primary" id="defi1-validate-btn" onclick="checkDefi1()">Vérifier l'arborescence</button>
+                <button class="btn-primary hidden" id="next-to-defi2" onclick="nextScreen('screen-defi2')">Exercice suivant →</button>
+            </div>
+        </section>
+
+        <!-- DÉFI 2 : BD RECONNAÎTRE UN FICHIER (Page 1 BD) -->
+        <section id="screen-defi2" class="card no-print">
+            <div class="defi-header">
+                <span class="badge">S22 · Exercice 2</span>
+                <h2>Enquête : La Bande Dessinée</h2>
+            </div>
+            <p class="consigne">Analyse la situation déclenchante de la page de ton cours (Léa et le professeur de Technologie) pour cocher les bonnes cases.</p>
+
+            <div class="quiz-block">
+                <p><strong>Question 1 :</strong> Qu'est-ce qui a disparu dans le deuxième affichage lorsque le professeur modifie les fichiers ?</p>
+                <label class="radio-label"><input type="radio" name="bd-q1" value="nom"> Le nom principal du fichier</label><br>
+                <label class="radio-label"><input type="radio" name="bd-q1" value="lettres"> Les lettres placées après le point (l'extension)</label><br>
+                <label class="radio-label"><input type="radio" name="bd-q1" value="icone"> L'icône du fichier</label>
+                
+                <p style="margin-top:1.5rem;"><strong>Question 2 :</strong> Quelles informations donnent des indices sur le contenu d'un fichier sans avoir besoin de l'ouvrir ? <em>(Plusieurs choix possibles)</em></p>
+                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="nom"> Son nom de fichier</label><br>
+                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="icone"> Son icône graphique</label><br>
+                <label class="checkbox-label"><input type="checkbox" name="bd-q2" value="lettres"> Les lettres placées après le point</label>
+            </div>
+
+            <div class="feedback" id="feedback-defi2"></div>
+            <div class="defi-footer">
+                <button class="btn-help" onclick="showHelp(2)">💡 Coup de pouce</button>
+                <button class="btn-primary" id="defi2-validate-btn" onclick="checkDefi2()">Valider l'analyse BD</button>
+                <button class="btn-primary hidden" id="next-to-defi3" onclick="nextScreen('screen-defi3')">Exercice suivant →</button>
+            </div>
+        </section>
+
+        <!-- DÉFI 3 : TABLEAU EXTENSIONS (Page 2) -->
+        <section id="screen-defi3" class="card no-print">
+            <div class="defi-header">
+                <span class="badge">S22 · Exercice 3</span>
+                <h2>Extensions et Logiciels associés</h2>
+            </div>
+            <p class="consigne">D'après ton tableau de recherche sur le réseau du collège, quel logiciel par défaut ouvre chaque extension ?</p>
+
+            <div class="matching-container">
+                <div class="match-row">
+                    <span>🎬 Fichier <code>.webm</code> (Ex: KPop_Demon_Hunters)</span>
+                    <select id="ext-webm" class="match-select">
+                        <option value="">-- Logiciel --</option>
+                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
+                        <option value="VLC">Logiciel multimédia VLC</option>
+                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
+                    </select>
+                </div>
+                <div class="match-row">
+                    <span>🎵 Fichier <code>.mp3</code> (Ex: Fortnite.mp3)</span>
+                    <select id="ext-mp3" class="match-select">
+                        <option value="">-- Logiciel --</option>
+                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
+                        <option value="VLC">Logiciel multimédia VLC</option>
+                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
+                    </select>
+                </div>
+                <div class="match-row">
+                    <span>📄 Fichier <code>.pdf</code> (Ex: Consignes.pdf)</span>
+                    <select id="ext-pdf" class="match-select">
+                        <option value="">-- Logiciel --</option>
+                        <option value="Adobe Acrobat">Adobe Acrobat Reader</option>
+                        <option value="VLC">Logiciel multimédia VLC</option>
+                        <option value="Lecteur multimédia">Lecteur multimédia Windows</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback-defi3"></div>
+            <div class="defi-footer">
+                <button class="btn-help" onclick="showHelp(3)">💡 Coup de pouce</button>
+                <button class="btn-primary" id="defi3-validate-btn" onclick="validateDefi3()">Vérifier le tableau</button>
+                <button class="btn-primary hidden" id="next-to-defi4" onclick="nextScreen('screen-defi4')">Exercice suivant →</button>
+            </div>
+        </section>
+
+        <!-- DÉFI 4 : TAILLES (Page 3) -->
+        <section id="screen-defi4" class="card no-print">
+            <div class="defi-header">
+                <span class="badge">S23 · Exercice 4</span>
+                <h2>Mesurer la taille des données numériques</h2>
+            </div>
+            <p class="consigne">Problème de fin de chapitre : Il te reste <strong>500 Mo</strong> libres sur ta clé USB. Peux-tu y stocker une vidéo de <strong>350 Mo</strong> ET une musique de <strong>8 Mo</strong> ?</p>
+
+            <div class="options-stack" id="defi4-options">
