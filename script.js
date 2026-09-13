@@ -7,27 +7,35 @@ const helpTexts = {
     5: "Aide Défi 5 : Recopie exactement le chemin en respectant les majuscules, les espaces et les antislashs (\\). Exemple : H:\\Ma classe\\Dossier en consultation\\..."
 };
 
-// --- Initialisation des variables d'état (avec Sauvegarde Locale) ---
-let score = parseInt(localStorage.getItem('tice_score')) || 4000;
-let errorsCount = parseInt(localStorage.getItem('tice_errors')) || 0;
-let currentScreen = localStorage.getItem('tice_screen') || 'screen-intro';
+// --- Initialisation des variables d'état sécurisée (anti-blocage navigateur) ---
+let score = 4000;
+let errorsCount = 0;
+let currentScreen = 'screen-intro';
 
-// --- Gestion en Temps Réel du Zoom (Accessibilité) ---
-const zoomRange = document.getElementById('zoom-range');
-const zoomLabel = document.getElementById('zoom-label');
-
-if (zoomRange) {
-    zoomRange.addEventListener('input', (e) => {
-        const value = e.target.value;
-        document.body.classList.remove('zoom-level-2', 'zoom-level-3');
-        if (value === "1") zoomLabel.textContent = "Normal";
-        else if (value === "2") { document.body.classList.add('zoom-level-2'); zoomLabel.textContent = "Grand"; }
-        else if (value === "3") { document.body.classList.add('zoom-level-3'); zoomLabel.textContent = "Très Grand / DYS"; }
-    });
+try {
+    if (localStorage.getItem('tice_score')) score = parseInt(localStorage.getItem('tice_score'));
+    if (localStorage.getItem('tice_errors')) errorsCount = parseInt(localStorage.getItem('tice_errors'));
+    if (localStorage.getItem('tice_screen')) currentScreen = localStorage.getItem('tice_screen');
+} catch (e) {
+    console.warn("Le stockage local est bloqué par le navigateur. Le jeu fonctionnera sans sauvegarde automatique.");
 }
 
-// Appliquer l'état sauvegardé au démarrage
+// --- Gestion en Temps Réel du Zoom (Accessibilité) ---
 window.addEventListener('DOMContentLoaded', () => {
+    const zoomRange = document.getElementById('zoom-range');
+    const zoomLabel = document.getElementById('zoom-label');
+
+    if (zoomRange && zoomLabel) {
+        zoomRange.addEventListener('input', (e) => {
+            const value = e.target.value;
+            document.body.classList.remove('zoom-level-2', 'zoom-level-3');
+            if (value === "1") zoomLabel.textContent = "Normal";
+            else if (value === "2") { document.body.classList.add('zoom-level-2'); zoomLabel.textContent = "Grand"; }
+            else if (value === "3") { document.body.classList.add('zoom-level-3'); zoomLabel.textContent = "Très Grand / DYS"; }
+        });
+    }
+
+    // Appliquer l'état au démarrage
     document.getElementById('current-score').textContent = score;
     if (currentScreen !== 'screen-intro') {
         nextScreen(currentScreen, false);
@@ -35,28 +43,39 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function saveProgress(screenId) {
-    localStorage.setItem('tice_score', score);
-    localStorage.setItem('tice_errors', errorsCount);
-    localStorage.setItem('tice_screen', screenId);
+    try {
+        localStorage.setItem('tice_score', score);
+        localStorage.setItem('tice_errors', errorsCount);
+        localStorage.setItem('tice_screen', screenId);
+    } catch (e) {
+        // Ignore discrètement l'erreur si le stockage est désactivé
+    }
 }
 
 function nextScreen(screenId, shouldSave = true) {
     document.querySelectorAll('main > section').forEach(screen => screen.classList.remove('active-screen'));
-    document.getElementById(screenId).classList.add('active-screen');
-    if (shouldSave) saveProgress(screenId);
+    const target = document.getElementById(screenId);
+    if (target) {
+        target.classList.add('active-screen');
+        if (shouldSave) saveProgress(screenId);
+    }
 }
 
 function triggerError() {
     errorsCount++;
     score = Math.max(0, score - 25);
     document.getElementById('current-score').textContent = score;
-    localStorage.setItem('tice_score', score);
-    localStorage.setItem('tice_errors', errorsCount);
+    try {
+        localStorage.setItem('tice_score', score);
+        localStorage.setItem('tice_errors', errorsCount);
+    } catch (e) {}
 }
 
 function resetGameDirect() {
     if (confirm("Veux-tu vraiment remettre le score à 4000 et recommencer l'activité depuis le début ?")) {
-        localStorage.clear();
+        try {
+            localStorage.clear();
+        } catch (e) {}
         score = 4000;
         errorsCount = 0;
         location.reload();
@@ -160,8 +179,6 @@ function checkDefi4(isCorrect) {
 function checkDefi5() {
     const userInput = document.getElementById('network-path-input').value.trim();
     const feedback = document.getElementById('feedback-defi5');
-    
-    // Le chemin exact attendu basé sur le document pour Pomme.bmp
     const correctPath = "H:\\Ma classe\\Dossier en consultation\\Technologie\\Images\\Pomme.bmp";
 
     if (!userInput) {
@@ -203,8 +220,3 @@ function showBilan() {
     } else if (score >= 2500) {
         document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "🥈 Maîtrise satisfaisante"; td.className = "status-valid"; });
     } else {
-        document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "⚠️ À réentraîner / Non acquis"; td.className = "status-error"; });
-    }
-
-    nextScreen('screen-bilan');
-}
