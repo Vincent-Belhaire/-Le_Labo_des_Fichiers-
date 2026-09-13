@@ -7,21 +7,12 @@ const helpTexts = {
     5: "Aide Défi 5 : Recopie exactement le chemin en respectant les majuscules, les espaces et les antislashs (\\). Exemple : H:\\Ma classe\\Dossier en consultation\\..."
 };
 
-// --- 2. GESTION DU SCORE ET DE LA PROGRESSION (LocalStorage direct) ---
-let score = parseInt(localStorage.getItem('tice_score')) || 4000;
-let errorsCount = parseInt(localStorage.getItem('tice_errors')) || 0;
-let currentScreen = localStorage.getItem('tice_screen') || 'screen-intro';
-
-// Affichage immédiat du score au chargement
-document.getElementById('current-score').textContent = score;
-
-// Si l'élève avait déjà commencé, on le remet sur son dernier écran
-if (currentScreen !== 'screen-intro') {
-    nextScreen(currentScreen, false);
-}
+// --- 2. GESTION DU SCORE ET DE LA PROGRESSION (Variables simples sans risque de blocage) ---
+let score = 4000;
+let errorsCount = 0;
 
 // --- 3. FONCTIONS DE NAVIGATION ET SCORE ---
-function nextScreen(screenId, shouldSave = true) {
+function nextScreen(screenId) {
     // Masquer toutes les sections
     const screens = document.querySelectorAll('main > section');
     for (let i = 0; i < screens.length; i++) {
@@ -33,25 +24,55 @@ function nextScreen(screenId, shouldSave = true) {
     if (targetScreen) {
         targetScreen.classList.add('active-screen');
     }
-
-    // Sauvegarder la position
-    if (shouldSave) {
-        localStorage.setItem('tice_screen', screenId);
-    }
 }
 
 function triggerError() {
     errorsCount++;
     score = Math.max(0, score - 25);
     document.getElementById('current-score').textContent = score;
-    localStorage.setItem('tice_score', score);
-    localStorage.setItem('tice_errors', errorsCount);
 }
 
 function resetGameDirect() {
     if (confirm("Veux-tu recommencer l'activité et remettre ton score à 4000 ?")) {
-        localStorage.clear();
-        location.reload();
+        score = 4000;
+        errorsCount = 0;
+        document.getElementById('current-score').textContent = score;
+        
+        // Réinitialiser les champs de saisie
+        document.getElementById('network-path-input').value = "";
+        document.getElementById('d1-r1').value = "";
+        document.getElementById('d1-r2').value = "";
+        document.getElementById('d1-r3').value = "";
+        document.getElementById('ext-webm').value = "";
+        document.getElementById('ext-mp3').value = "";
+        document.getElementById('ext-pdf').value = "";
+        
+        // Décocher les boutons radios / checkbox
+        const inputs = document.querySelectorAll('.quiz-block input');
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].checked = false;
+        }
+        
+        // Masquer les boutons "Suivant" et réafficher les boutons de validation
+        document.getElementById('defi1-validate-btn').classList.remove('hidden');
+        document.getElementById('next-to-defi2').classList.add('hidden');
+        document.getElementById('defi2-validate-btn').classList.remove('hidden');
+        document.getElementById('next-to-defi3').classList.add('hidden');
+        document.getElementById('defi3-validate-btn').classList.remove('hidden');
+        document.getElementById('next-to-defi4').classList.add('hidden');
+        document.getElementById('defi4-options').classList.remove('hidden');
+        document.getElementById('next-to-defi5').classList.add('hidden');
+        document.getElementById('defi5-validate-btn').classList.remove('hidden');
+        document.getElementById('btn-finish').classList.add('hidden');
+        
+        // Effacer les feedbacks
+        const feedbacks = document.querySelectorAll('.feedback');
+        for (let i = 0; i < feedbacks.length; i++) {
+            feedbacks[i].className = "feedback";
+            feedbacks[i].textContent = "";
+        }
+
+        nextScreen('screen-intro');
     }
 }
 
@@ -197,21 +218,3 @@ function showBilan() {
     } else if (score >= 2500) {
         document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "🥈 Maîtrise satisfaisante"; td.className = "status-valid"; });
     } else {
-        document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "⚠️ À réentraîner / Non acquis"; td.className = "status-error"; });
-    }
-
-    nextScreen('screen-bilan');
-}
-
-// --- 6. ÉCOUTEUR DU BARRE DE ZOOM (Optionnel mais direct) ---
-const zoomRange = document.getElementById('zoom-range');
-if (zoomRange) {
-    zoomRange.addEventListener('input', (e) => {
-        const value = e.target.value;
-        const zoomLabel = document.getElementById('zoom-label');
-        document.body.classList.remove('zoom-level-2', 'zoom-level-3');
-        if (value === "1" && zoomLabel) zoomLabel.textContent = "Normal";
-        else if (value === "2" && zoomLabel) { document.body.classList.add('zoom-level-2'); zoomLabel.textContent = "Grand"; }
-        else if (value === "3" && zoomLabel) { document.body.classList.add('zoom-level-3'); zoomLabel.textContent = "Très Grand / DYS"; }
-    });
-}
