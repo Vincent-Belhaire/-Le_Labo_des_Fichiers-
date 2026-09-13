@@ -1,4 +1,4 @@
-// --- Configuration des Questions issues de vos chapitres ---
+// --- 1. CONFIGURATION DES TEXTES D'AIDE ---
 const helpTexts = {
     1: "Aide Défi 1 : Observe le schéma. Les fichiers se trouvent à droite. Suis les lignes rouges pour voir dans quel dossier de l'arborescence ils doivent être rangés.",
     2: "Aide Défi 2 : Pense à la bande dessinée du cours ! Quand le professeur efface les lettres après le point, on ne sait plus rien du type de fichier. L'icône change aussi selon le format.",
@@ -7,57 +7,36 @@ const helpTexts = {
     5: "Aide Défi 5 : Recopie exactement le chemin en respectant les majuscules, les espaces et les antislashs (\\). Exemple : H:\\Ma classe\\Dossier en consultation\\..."
 };
 
-// --- Initialisation des variables d'état sécurisée (anti-blocage navigateur) ---
-let score = 4000;
-let errorsCount = 0;
-let currentScreen = 'screen-intro';
+// --- 2. GESTION DU SCORE ET DE LA PROGRESSION (LocalStorage direct) ---
+let score = parseInt(localStorage.getItem('tice_score')) || 4000;
+let errorsCount = parseInt(localStorage.getItem('tice_errors')) || 0;
+let currentScreen = localStorage.getItem('tice_screen') || 'screen-intro';
 
-try {
-    if (localStorage.getItem('tice_score')) score = parseInt(localStorage.getItem('tice_score'));
-    if (localStorage.getItem('tice_errors')) errorsCount = parseInt(localStorage.getItem('tice_errors'));
-    if (localStorage.getItem('tice_screen')) currentScreen = localStorage.getItem('tice_screen');
-} catch (e) {
-    console.warn("Le stockage local est bloqué par le navigateur. Le jeu fonctionnera sans sauvegarde automatique.");
+// Affichage immédiat du score au chargement
+document.getElementById('current-score').textContent = score;
+
+// Si l'élève avait déjà commencé, on le remet sur son dernier écran
+if (currentScreen !== 'screen-intro') {
+    nextScreen(currentScreen, false);
 }
 
-// --- Gestion en Temps Réel du Zoom (Accessibilité) ---
-window.addEventListener('DOMContentLoaded', () => {
-    const zoomRange = document.getElementById('zoom-range');
-    const zoomLabel = document.getElementById('zoom-label');
-
-    if (zoomRange && zoomLabel) {
-        zoomRange.addEventListener('input', (e) => {
-            const value = e.target.value;
-            document.body.classList.remove('zoom-level-2', 'zoom-level-3');
-            if (value === "1") zoomLabel.textContent = "Normal";
-            else if (value === "2") { document.body.classList.add('zoom-level-2'); zoomLabel.textContent = "Grand"; }
-            else if (value === "3") { document.body.classList.add('zoom-level-3'); zoomLabel.textContent = "Très Grand / DYS"; }
-        });
-    }
-
-    // Appliquer l'état au démarrage
-    document.getElementById('current-score').textContent = score;
-    if (currentScreen !== 'screen-intro') {
-        nextScreen(currentScreen, false);
-    }
-});
-
-function saveProgress(screenId) {
-    try {
-        localStorage.setItem('tice_score', score);
-        localStorage.setItem('tice_errors', errorsCount);
-        localStorage.setItem('tice_screen', screenId);
-    } catch (e) {
-        // Ignore discrètement l'erreur si le stockage est désactivé
-    }
-}
-
+// --- 3. FONCTIONS DE NAVIGATION ET SCORE ---
 function nextScreen(screenId, shouldSave = true) {
-    document.querySelectorAll('main > section').forEach(screen => screen.classList.remove('active-screen'));
-    const target = document.getElementById(screenId);
-    if (target) {
-        target.classList.add('active-screen');
-        if (shouldSave) saveProgress(screenId);
+    // Masquer toutes les sections
+    const screens = document.querySelectorAll('main > section');
+    for (let i = 0; i < screens.length; i++) {
+        screens[i].classList.remove('active-screen');
+    }
+    
+    // Afficher l'écran demandé
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.classList.add('active-screen');
+    }
+
+    // Sauvegarder la position
+    if (shouldSave) {
+        localStorage.setItem('tice_screen', screenId);
     }
 }
 
@@ -65,24 +44,20 @@ function triggerError() {
     errorsCount++;
     score = Math.max(0, score - 25);
     document.getElementById('current-score').textContent = score;
-    try {
-        localStorage.setItem('tice_score', score);
-        localStorage.setItem('tice_errors', errorsCount);
-    } catch (e) {}
+    localStorage.setItem('tice_score', score);
+    localStorage.setItem('tice_errors', errorsCount);
 }
 
 function resetGameDirect() {
-    if (confirm("Veux-tu vraiment remettre le score à 4000 et recommencer l'activité depuis le début ?")) {
-        try {
-            localStorage.clear();
-        } catch (e) {}
-        score = 4000;
-        errorsCount = 0;
+    if (confirm("Veux-tu recommencer l'activité et remettre ton score à 4000 ?")) {
+        localStorage.clear();
         location.reload();
     }
 }
 
-// --- LOGIQUE DU DÉFI 1 : Tri & Arborescence (Page 1) ---
+// --- 4. LOGIQUE DES EXERCICES ---
+
+// Défi 1 : Arborescence
 function checkDefi1() {
     const r1 = document.getElementById('d1-r1').value;
     const r2 = document.getElementById('d1-r2').value;
@@ -107,7 +82,7 @@ function checkDefi1() {
     }
 }
 
-// --- LOGIQUE DU DÉFI 2 : BD Reconnaître un Fichier (Page 1) ---
+// Défi 2 : Bande Dessinée
 function checkDefi2() {
     const q1 = document.querySelector('input[name="bd-q1"]:checked');
     const q2_opts = document.querySelectorAll('input[name="bd-q2"]:checked');
@@ -135,7 +110,7 @@ function checkDefi2() {
     }
 }
 
-// --- LOGIQUE DU DÉFI 3 : Tableau Extensions & Logiciels (Page 2) ---
+// Défi 3 : Extensions & Logiciels
 function validateDefi3() {
     const webm = document.getElementById('ext-webm').value;
     const mp3 = document.getElementById('ext-mp3').value;
@@ -160,7 +135,7 @@ function validateDefi3() {
     }
 }
 
-// --- LOGIQUE DU DÉFI 4 : Calcul de Tailles (Page 3) ---
+// Défi 4 : Tailles de fichiers
 function checkDefi4(isCorrect) {
     const feedback = document.getElementById('feedback-defi4');
     if (isCorrect) {
@@ -175,7 +150,7 @@ function checkDefi4(isCorrect) {
     }
 }
 
-// --- LOGIQUE DU DÉFI 5 : Saisie Chemin Réseau Écrit (Page 2 du cours) ---
+// Défi 5 : Saisie du chemin réseau
 function checkDefi5() {
     const userInput = document.getElementById('network-path-input').value.trim();
     const feedback = document.getElementById('feedback-defi5');
@@ -188,7 +163,7 @@ function checkDefi5() {
     }
 
     if (userInput === correctPath) {
-        feedback.textContent = "✅ Incroyable ! Tu as saisi le chemin d'accès exact sans aucune erreur de syntaxe ni d'espace.";
+        feedback.textContent = "✅ Incroyable ! Tu as saisi le chemin d'accès exact sans aucune erreur.";
         feedback.className = "feedback correct";
         document.getElementById('defi5-validate-btn').classList.add('hidden');
         document.getElementById('btn-finish').classList.remove('hidden');
@@ -199,14 +174,16 @@ function checkDefi5() {
     }
 }
 
-// --- Gestion des Modales ---
+// --- 5. GESTION DES INDICES ET BILAN ---
 function showHelp(defiId) {
     document.getElementById('help-text').textContent = helpTexts[defiId];
     document.getElementById('help-modal').classList.remove('hidden');
 }
-function closeHelp() { document.getElementById('help-modal').classList.add('hidden'); }
 
-// --- Écran de Bilan final ---
+function closeHelp() {
+    document.getElementById('help-modal').classList.add('hidden');
+}
+
 function showBilan() {
     document.getElementById('final-score').textContent = score;
     document.getElementById('error-count').textContent = errorsCount;
@@ -220,3 +197,21 @@ function showBilan() {
     } else if (score >= 2500) {
         document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "🥈 Maîtrise satisfaisante"; td.className = "status-valid"; });
     } else {
+        document.querySelectorAll('.table-bilan td[id^="status"]').forEach(td => { td.textContent = "⚠️ À réentraîner / Non acquis"; td.className = "status-error"; });
+    }
+
+    nextScreen('screen-bilan');
+}
+
+// --- 6. ÉCOUTEUR DU BARRE DE ZOOM (Optionnel mais direct) ---
+const zoomRange = document.getElementById('zoom-range');
+if (zoomRange) {
+    zoomRange.addEventListener('input', (e) => {
+        const value = e.target.value;
+        const zoomLabel = document.getElementById('zoom-label');
+        document.body.classList.remove('zoom-level-2', 'zoom-level-3');
+        if (value === "1" && zoomLabel) zoomLabel.textContent = "Normal";
+        else if (value === "2" && zoomLabel) { document.body.classList.add('zoom-level-2'); zoomLabel.textContent = "Grand"; }
+        else if (value === "3" && zoomLabel) { document.body.classList.add('zoom-level-3'); zoomLabel.textContent = "Très Grand / DYS"; }
+    });
+}
